@@ -1,0 +1,361 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create Infrastructure to deploy Amazon SageMaker FeatureStore 
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Required Parameters
+        Parameters:
+          - LambdaZipsBucket
+          - ResourceVersion
+          - CreditCardAggregateFeatureStoreName
+          - CreditCardAggregateBatchFeatureStoreName
+    ParameterLabels:
+      LambdaZipsBucket:
+        default: S3 Bucket where Lambda code is stored in zip file
+      ResourceVersion:
+        default: Version string for resources
+      CreditCardAggregateFeatureStoreName:
+        default: Feature Group name for credit card aggregate data
+      CreditCardAggregateBatchFeatureStoreName:
+        default: Feature Group name for credit card batch aggregate data
+
+Parameters:
+  ResourceVersion:
+    Type: String
+    Description: Version string attached to Lambda function and other resources.
+    MinLength: 1
+    MaxLength: 15
+    AllowedPattern: ^.*[0-9]$
+    ConstraintDescription: Must end with numeric character.
+  CreditCardAggregateFeatureStoreName:
+    Default: cc-agg-fg
+    Type: String
+    Description: CreditCard Aggregate FeatureGroup Name
+    MinLength: 1
+    MaxLength: 63
+    AllowedPattern: ^[a-z0-9](-*[a-z0-9])* # no UPPERCASE due to S3 dependency
+    ConstraintDescription: Must be lowercase or numbers with a length of 1-63 characters.
+  CreditCardAggregateBatchFeatureStoreName:
+    Default: cc-agg-batch-fg
+    Type: String
+    Description: CreditCard Aggregate Batch FeatureGroup Name
+    MinLength: 1
+    MaxLength: 63
+    AllowedPattern: ^[a-z0-9](-*[a-z0-9])* # no UPPERCASE due to S3 dependency
+    ConstraintDescription: Must be lowercase or numbers with a length of 1-63 characters.
+  LambdaZipsBucket:
+    Default: sagemaker-sample-content-105242341581-us-east-2
+    Type: String
+    Description: Bucket for Lambda code storage
+    MinLength: 1
+    MaxLength: 63
+
+Resources:
+  SageMakerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: MySagemakerRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "sagemaker.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "kinesisanalytics.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonKinesisFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonKinesisAnalyticsFullAccess"
+        - "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+      Policies:
+        - PolicyName: AdditionalSageMakerPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: AllowCloudFormation
+                Effect: Allow
+                Action:
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents
+                Resource:
+                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/FeatureStoreStack*
+              - Sid: AllowLambdaInvoke
+                Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - lambda:GetFunctionConfiguration
+                  - lambda:UpdateFunctionConfiguration
+                  - lambda:InvokeAsync
+                  - lambda:CreateEventSourceMapping
+                  - lambda:DeleteEventSourceMapping
+                  - lambda:ListEventSourceMappings
+                Resource: "*"
+              - Sid: SageMakerTesting
+                Effect: Allow
+                Action:
+                  - sagemaker:CreateExperiment
+                  - sagemaker:CreateTrial
+                  - sagemaker:DescribeEndpoint
+                  - sagemaker:DescribeEndpointConfig
+                  - sagemaker:DescribeMonitoringSchedule
+                  - sagemaker:DescribeProcessingJob
+                  - sagemaker:InvokeEndpoint
+                  - sagemaker:ListMonitoringExecutions
+                  - sagemaker:Search
+                Resource: "*"
+              - Sid: AllowCloudWatch
+                Effect: Allow
+                Action:
+                  - cloudwatch:PutDashboard
+                  - cloudwatch:PutMetricData
+                  - cloudwatch:PutMetricAlarm
+                  - cloudwatch:DeleteAlarms
+                  - cloudwatch:PutDashboard
+                  - cloudwatch:DeleteDashboards
+                Resource: "*"
+              - Sid: AllowPassRole
+                Effect: Allow
+                Action:
+                  - iam:GetRole
+                  - iam:PassRole
+                Resource: "*"
+              - Sid: AllowLogQuery
+                Effect: Allow
+                Action:
+                  - logs:StartQuery
+                  - logs:GetQueryResults
+                Resource:
+                  - "*"
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: MyLambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonKinesisFullAccess
+      Path: "/"
+      Policies:
+        - PolicyName: AdditionalLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: AllowCloudFormation
+                Effect: Allow
+                Action:
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents
+                Resource:
+                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/FeatureStoreStack*
+              - Sid: AllowLambdaInvoke
+                Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - lambda:GetFunctionConfiguration
+                  - lambda:UpdateFunctionConfiguration
+                  - lambda:InvokeAsync
+                  - lambda:CreateEventSourceMapping
+                  - lambda:DeleteEventSourceMapping
+                  - lambda:ListEventSourceMappings
+                Resource: "*"
+              - Sid: AllowSageMakerInvoke
+                Effect: Allow
+                Action:
+                  - sagemaker:CreateExperiment
+                  - sagemaker:CreateTrial
+                  - sagemaker:DescribeEndpoint
+                  - sagemaker:DescribeEndpointConfig
+                  - sagemaker:DescribeMonitoringSchedule
+                  - sagemaker:DescribeProcessingJob
+                  - sagemaker:InvokeEndpoint
+                  - sagemaker:ListMonitoringExecutions
+                  - sagemaker:Search
+                Resource: "*"
+
+  FeatureStorePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: SageMakerFeatureStorePolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: SageMakerFeatureStore
+            Effect: Allow
+            Action:
+              - sagemakerfeaturestore:CreateFeatureGroup
+              - sagemakerfeaturestore:UpdateFeatureGroup
+              - sagemakerfeaturestore:DescribeFeatureGroup
+              - sagemakerfeaturestore:DeleteFeatureGroup
+              - sagemakerfeaturestore:ListFeatureGroups
+              - sagemaker:PutRecord
+              - sagemaker:GetRecord
+              - sagemaker:DeleteRecord
+              - featurestore-runtime:PutRecord
+              - featurestore-runtime:GetRecord
+              - featurestore-runtime:DeleteRecord
+              - s3:PutBucketPolicy
+              - s3:DeleteBucket
+              - glue:CreateCrawler
+              - glue:StartCrawler
+              - glue:GetCrawler
+              - glue:GetTable
+              - glue:GetPartitions
+              - glue:DeleteCrawler
+              - glue:DeleteDatabase
+              - athena:StartQueryExecution
+              - athena:GetQueryExecution
+            Resource: "*"
+      Roles:
+        - !Ref SageMakerRole
+        - !Ref LambdaRole
+
+  S3AccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: S3FeatureStorePolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: FeatureStoreOfflineStoreS3BucketPolicy
+            Effect: Allow
+            Action:
+              - s3:CreateBucket
+              - s3:GetBucket*
+              - s3:GetObject*
+              - s3:ListBucket
+              - s3:PutObject
+              - s3:PutObjectAcl
+            Resource:
+              - !Sub arn:aws:s3:::sagemaker-${AWS::Region}-${AWS::AccountId}/*
+              - !Sub arn:aws:s3:::sagemaker-${AWS::Region}-${AWS::AccountId}
+          - Sid: AllowLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: "*"
+      Roles:
+        - !Ref SageMakerRole
+        - !Ref LambdaRole
+
+  Boto3LibLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - python3.6
+        - python3.7
+      Content:
+        S3Bucket: !Ref LambdaZipsBucket
+        S3Key: fraud-detection-code/boto3-1-16-28.zip
+      Description: Upgraded version of boto3 library for SageMaker FeatureStore
+      LayerName: boto3-1-16-28
+      LicenseInfo: MIT
+
+  PredictLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub InvokeFraudEndpointLambda-${ResourceVersion}
+      Description: LambdaFunction for Python
+      Runtime: python3.7
+      Handler: lambda_function.lambda_handler
+      Code:
+        S3Bucket: !Ref LambdaZipsBucket
+        S3Key: fraud-detection-code/InvokeFraudEndpointLambda.zip
+      Layers:
+        - !Ref Boto3LibLayer
+      MemorySize: 512
+      Timeout: 60
+      Role: !GetAtt LambdaRole.Arn
+      Environment:
+        Variables:
+          CC_AGG_FEATURE_GROUP_NAME: !Ref CreditCardAggregateFeatureStoreName
+          CC_AGG_BATCH_FEATURE_GROUP_NAME: !Ref CreditCardAggregateBatchFeatureStoreName
+          ENDPOINT_NAME: this_will_be_overwritten_by_notebook
+          FRAUD_THRESHOLD: 0.25
+          LOG_LEVEL: INFO
+          HOME: /tmp
+
+  IngestLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub StreamingIngestAggFeatures-${ResourceVersion}
+      Description: LambdaFunction for Python
+      Runtime: python3.7
+      Handler: lambda_function.lambda_handler
+      Code:
+        S3Bucket: !Ref LambdaZipsBucket
+        S3Key: fraud-detection-code/StreamingIngestAggFeatures.zip
+      Layers:
+        - !Ref Boto3LibLayer
+      MemorySize: 512
+      Timeout: 60
+      Role: !GetAtt LambdaRole.Arn
+      Environment:
+        Variables:
+          CC_AGG_FEATURE_GROUP_NAME: !Ref CreditCardAggregateFeatureStoreName
+          HOME: /tmp
+
+  FeatureStoreNotebook:
+    Type: "AWS::SageMaker::NotebookInstance"
+    Properties:
+      NotebookInstanceName: featurestore-eval
+      InstanceType: "ml.m5.xlarge"
+      RoleArn: !GetAtt SageMakerRole.Arn
+      DefaultCodeRepository: "https://github.com/awslabs/amazon-sagemaker-workshop"
+
+Outputs:
+  LambdaRoleARN:
+    Description: Role for Lambda execution.
+    Value: !GetAtt LambdaRole.Arn
+    Export:
+      Name:
+        Fn::Sub: LambdaRole
+  PredictLambdaFunctionName:
+    Value:
+      Ref: PredictLambdaFunction
+  PredictLambdaFunctionARN:
+    Description: Lambda function ARN.
+    Value: !GetAtt PredictLambdaFunction.Arn
+    Export:
+      Name:
+        Fn::Sub: PredictLambdaARN-${ResourceVersion}
+  IngestLambdaFunctionName:
+    Value:
+      Ref: IngestLambdaFunction
+  IngestLambdaFunctionARN:
+    Description: Lambda function ARN.
+    Value: !GetAtt IngestLambdaFunction.Arn
+    Export:
+      Name:
+        Fn::Sub: IngestLambdaARN-${ResourceVersion}
+  FeatureStoreNotebookId:
+    Value: !Ref FeatureStoreNotebook
+
