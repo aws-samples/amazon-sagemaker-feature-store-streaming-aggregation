@@ -46,7 +46,7 @@ Parameters:
     AllowedPattern: ^[a-z0-9](-*[a-z0-9])* # no UPPERCASE due to S3 dependency
     ConstraintDescription: Must be lowercase or numbers with a length of 1-63 characters.
   LambdaZipsBucket:
-    Default: sagemaker-sample-content-105242341581-us-east-2
+    Default: aws-ml-blog
     Type: String
     Description: Bucket for Lambda code storage
     MinLength: 1
@@ -274,7 +274,7 @@ Resources:
         - python3.7
       Content:
         S3Bucket: !Ref LambdaZipsBucket
-        S3Key: fraud-detection-code/boto3-1-16-28.zip
+        S3Key: artifacts/Using-streaming-ingestion-with-Amazon-SageMaker-Feature-Store/boto3-1-16-28.zip
       Description: Upgraded version of boto3 library for SageMaker FeatureStore
       LayerName: boto3-1-16-28
       LicenseInfo: MIT
@@ -288,7 +288,7 @@ Resources:
       Handler: lambda_function.lambda_handler
       Code:
         S3Bucket: !Ref LambdaZipsBucket
-        S3Key: fraud-detection-code/InvokeFraudEndpointLambda.zip
+        S3Key: artifacts/Using-streaming-ingestion-with-Amazon-SageMaker-Feature-Store/InvokeFraudEndpointLambda.zip
       Layers:
         - !Ref Boto3LibLayer
       MemorySize: 512
@@ -312,7 +312,7 @@ Resources:
       Handler: lambda_function.lambda_handler
       Code:
         S3Bucket: !Ref LambdaZipsBucket
-        S3Key: fraud-detection-code/StreamingIngestAggFeatures.zip
+        S3Key: artifacts/Using-streaming-ingestion-with-Amazon-SageMaker-Feature-Store/StreamingIngestAggFeatures.zip
       Layers:
         - !Ref Boto3LibLayer
       MemorySize: 512
