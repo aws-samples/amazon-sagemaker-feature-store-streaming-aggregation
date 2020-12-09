@@ -8,43 +8,27 @@ Metadata:
           default: Required Parameters
         Parameters:
           - LambdaZipsBucket
-          - SageMakerNotebookName
-          - SageMakerNotebookInstanceType
+          - ResourceVersion
           - CreditCardAggregateFeatureStoreName
           - CreditCardAggregateBatchFeatureStoreName
     ParameterLabels:
       LambdaZipsBucket:
         default: S3 Bucket where Lambda code is stored in zip file
-      SageMakerNotebookName:
-        default: Name of SageMaker Notebook Instance
-      SageMakerNotebookInstanceType:
-        default: SageMaker Notebook Instance Type
+      ResourceVersion:
+        default: Version string for resources
       CreditCardAggregateFeatureStoreName:
         default: Feature Group name for credit card aggregate data
       CreditCardAggregateBatchFeatureStoreName:
         default: Feature Group name for credit card batch aggregate data
 
 Parameters:
-  SageMakerNotebookName:
-    Default: featurestore-streaming-agg
+  ResourceVersion:
     Type: String
-    Description: Name of SageMaker Notebook Instance
+    Description: Version string attached to Lambda function and other resources.
     MinLength: 1
-    MaxLength: 63
-    AllowedPattern: ^[a-z0-9](-*[a-z0-9])*
-    ConstraintDescription: Must be lowercase or numbers with a length of 1-63 characters.
-  SageMakerNotebookInstanceType:
-    Default: ml.m5.xlarge
-    AllowedValues:
-      - ml.t2.xlarge
-      - ml.t3.xlarge
-      - ml.c5.xlarge
-      - ml.m5.xlarge
-    Type: String
-    Description: SageMaker Notebook Instance Type
-    MinLength: 1
-    MaxLength: 31
-    ConstraintDescription: Must be one of the allowed ML Instance Types
+    MaxLength: 15
+    AllowedPattern: ^.*[0-9]$
+    ConstraintDescription: Must end with numeric character.
   CreditCardAggregateFeatureStoreName:
     Default: cc-agg-fg
     Type: String
@@ -110,7 +94,8 @@ Resources:
                 Action:
                   - cloudformation:DescribeStacks
                   - cloudformation:DescribeStackEvents
-                Resource: "*"
+                Resource:
+                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/FeatureStoreStack*
               - Sid: AllowLambdaInvoke
                 Effect: Allow
                 Action:
@@ -187,7 +172,8 @@ Resources:
                 Action:
                   - cloudformation:DescribeStacks
                   - cloudformation:DescribeStackEvents
-                Resource: "*"
+                Resource:
+                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/FeatureStoreStack*
               - Sid: AllowLambdaInvoke
                 Effect: Allow
                 Action:
@@ -296,7 +282,7 @@ Resources:
   PredictLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: InvokeFraudEndpointLambda
+      FunctionName: !Sub InvokeFraudEndpointLambda-${ResourceVersion}
       Description: LambdaFunction for Python
       Runtime: python3.7
       Handler: lambda_function.lambda_handler
@@ -320,7 +306,7 @@ Resources:
   IngestLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: StreamingIngestAggFeatures
+      FunctionName: !Sub StreamingIngestAggFeatures-${ResourceVersion}
       Description: LambdaFunction for Python
       Runtime: python3.7
       Handler: lambda_function.lambda_handler
@@ -340,8 +326,8 @@ Resources:
   FeatureStoreNotebook:
     Type: "AWS::SageMaker::NotebookInstance"
     Properties:
-      NotebookInstanceName: !Ref SageMakerNotebookName
-      InstanceType: !Ref SageMakerNotebookInstanceType
+      NotebookInstanceName: featurestore-eval
+      InstanceType: "ml.m5.xlarge"
       RoleArn: !GetAtt SageMakerRole.Arn
       DefaultCodeRepository: "https://github.com/awslabs/amazon-sagemaker-workshop"
 
@@ -360,7 +346,7 @@ Outputs:
     Value: !GetAtt PredictLambdaFunction.Arn
     Export:
       Name:
-        Fn::Sub: PredictLambdaARN
+        Fn::Sub: PredictLambdaARN-${ResourceVersion}
   IngestLambdaFunctionName:
     Value:
       Ref: IngestLambdaFunction
@@ -369,6 +355,7 @@ Outputs:
     Value: !GetAtt IngestLambdaFunction.Arn
     Export:
       Name:
-        Fn::Sub: IngestLambdaARN
+        Fn::Sub: IngestLambdaARN-${ResourceVersion}
   FeatureStoreNotebookId:
     Value: !Ref FeatureStoreNotebook
+
