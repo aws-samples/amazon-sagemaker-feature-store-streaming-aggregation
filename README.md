@@ -44,7 +44,9 @@ You can [deploy the stack in us-east-1 region](https://us-east-1.console.aws.ama
 5. View the Lambda function that receives the initial kinesis events and writes to the FeatureStore
 6. View the Lambda function that receives the final kinesis events and triggers the model prediction
 
-You can view the CloudFormation template directly by looking in the cloud-formation directory above and clicking on the file name sagemaker-featurestore-template.yaml   The stack will take a few minutes to launch; it will create a new S3 Bucket, create two new Lambda functions, create several IAM Roles and Policies, and create a SageMaker Notebook instance. When it completes, you can view the items created by clicking on the Resources tab:
+You can view the CloudFormation template directly by looking in the cloud-formation directory above and clicking on the file name sagemaker-featurestore-template.yaml   The stack will take a few minutes to launch; it will create a new S3 Bucket, create two new Lambda functions, create several IAM Roles and Policies, and create a SageMaker Notebook instance. When it completes, you can view the items created by clicking on the Resources tab.
+
+To deploy the stack in other regions, [follow these instructions](./create_stack_in_other_regions.md).
 
 
 #### Running the Notebooks
