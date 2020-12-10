@@ -28,10 +28,13 @@ Prior to running the steps under Instructions, you will need access to an AWS Ac
 
 First you will login to your AWS account with an Admin user or role. This will allow the successful launch of the CloudFormation stack template. You can deploy the stack and explore our example by following these steps:
 
+To begin, click the Launch link in Step 1 below
+
 1. [Launch](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template?stackName=sm-fs-streaming-agg-stack&templateURL=https://aws-ml-blog.s3.us-east-1.amazonaws.com/artifacts/Using-streaming-ingestion-with-Amazon-SageMaker-Feature-Store/sagemaker-featurestore-template.yaml) the AWS CloudFormation stack in us-east-1. 
 To deploy the stack in other regions, [follow these instructions](./create_stack_in_other_regions.md).
 
-  - Note that during CloudFormation configuration, you can easily select between several ML Instance Types, used by SageMaker to deploy the Notebook, using the selector as shown here:
+  - You will need to give your CloudFormation stack a name. We suggest you enter the preferred name -> `sm-fs-streaming-agg-stack` (note, if you use a different Stack name, you will need to update the cell at the top of notebook named `1_setup.ipynb` to match it)
+  - During CloudFormation configuration, you can easily select between several ML Instance Types, used by SageMaker to deploy the Notebook, using the selector as shown here:
 <img src="./notebooks/images/CFN-Param-InstanceType-select.png" />
 
   - The CloudFormation deployment can take a few minutes, so be patient, you can always hit the Refresh arrow to update the status. When it's done, you can click on the `Resources` tab to see the architectural resources created by the template. Here is an example:
