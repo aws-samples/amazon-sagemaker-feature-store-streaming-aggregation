@@ -30,6 +30,13 @@ First you will login to your AWS account with an Admin user or role. This will a
 
 1. [Launch](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template?stackName=sm-fs-streaming-agg-stack&templateURL=https://aws-ml-blog.s3.us-east-1.amazonaws.com/artifacts/Using-streaming-ingestion-with-Amazon-SageMaker-Feature-Store/sagemaker-featurestore-template.yaml) the AWS CloudFormation stack in us-east-1. 
 To deploy the stack in other regions, [follow these instructions](./create_stack_in_other_regions.md).
+
+  - Note that during CloudFormation configuration, you can easily select between several ML Instance Types, used by SageMaker to deploy the Notebook, using the selector as shown here:
+<img src="./notebooks/images/CFN-Param-InstanceType-select.png" />
+
+  - The CloudFormation deployment can take a few minutes, so be patient, you can always hit the Refresh arrow to update the status. When it's done, you can click on the `Resources` tab to see the architectural resources created by the template. Here is an example:
+<img src="./notebooks/images/CFN-Stack-CREATE_COMPLETE.png" />
+
 2. Once the stack is complete, open the SageMaker Notebook instance and read and execute each notebook.
 3. View the Kinesis Stream that is used to ingest records.
 4. View the Kinesis Data Analytics SQL query that pulls data from the stream.
