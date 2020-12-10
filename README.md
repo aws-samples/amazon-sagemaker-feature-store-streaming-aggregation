@@ -26,9 +26,7 @@ Prior to running the steps under Instructions, you will need access to an AWS Ac
 
 #### Instructions
 
-First you will login to your AWS account with an Admin user or role. This will allow the successful launch of the CloudFormation stack template below.  
-
-You can deploy the stack and explore our example by following these steps:
+First you will login to your AWS account with an Admin user or role. This will allow the successful launch of the CloudFormation stack template. You can deploy the stack and explore our example by following these steps:
 
 1. [Launch](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template?stackName=sm-fs-streaming-agg-stack&templateURL=https://aws-ml-blog.s3.us-east-1.amazonaws.com/artifacts/Using-streaming-ingestion-with-Amazon-SageMaker-Feature-Store/sagemaker-featurestore-template.yaml) the AWS CloudFormation stack in us-east-1. 
 To deploy the stack in other regions, [follow these instructions](./create_stack_in_other_regions.md).
@@ -39,6 +37,8 @@ To deploy the stack in other regions, [follow these instructions](./create_stack
 6. View the Lambda function that receives the final kinesis events and triggers the model prediction.
 
 You can view the CloudFormation template directly by looking [here](./templates/sagemaker-featurestore-template.yaml). The stack will take a few minutes to launch. When it completes, you can view the items created by clicking on the Resources tab.
+
+To use these notebooks from SageMaker Studio, add a new Studio user, selecting the IAM role that was created by the CloudFormation stack. Open Studio for that new user, and git clone this repo. All other steps are the same.
 
 #### Running the Notebooks
 
