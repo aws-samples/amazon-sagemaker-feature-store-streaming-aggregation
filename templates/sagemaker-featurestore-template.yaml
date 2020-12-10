@@ -343,7 +343,7 @@ Resources:
       NotebookInstanceName: !Ref SageMakerNotebookName
       InstanceType: !Ref SageMakerNotebookInstanceType
       RoleArn: !GetAtt SageMakerRole.Arn
-      DefaultCodeRepository: "https://github.com/awslabs/amazon-sagemaker-workshop"
+      DefaultCodeRepository: "https://github.com/aws-samples/amazon-sagemaker-feature-store-streaming-aggregation"
 
 Outputs:
   LambdaRoleARN:
