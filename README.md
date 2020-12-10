@@ -49,15 +49,7 @@ You can view the CloudFormation template directly by looking in the cloud-format
 
 #### Running the Notebooks
 
-There are a series of six notebooks which should be run in order (they each begin with a numeral). Each notebook achieves a certain purpose using the SageMaker Python SDK (add link here) to interact with S3 buckets, Amazon Kinesis, Lambda functions, and the SageMaker FeatureStore. We use the simulated credit card fraud dataset, which has certain attributes, like credit_card_number, transaction_amount, etc. We then create aggregate data and store it in the Feature Store, including these attributes that represent aggregate averages and counts over 10-minute and 1-week timeframes: 
-
-* num_trans_last_10m
-* num_trans_last_1w
-* avg_amt_last_10m
-* avg_amt_last_1w
-
-
-Follow the step-by-step guide in the following notebooks:
+There are a series of notebooks which should be run in order. Follow the step-by-step guide in each notebook:
 
 * [notebooks/0_prepare_transactions_dataset.ipynb](./notebooks/0_prepare_transactions_dataset.ipynb) - generate synthetic dataset
 * [notebooks/1_setup.ipynb](./notebooks/1_setup.ipynb) - create feature groups and Kinesis resources
