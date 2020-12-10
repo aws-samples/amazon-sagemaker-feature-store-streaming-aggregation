@@ -1,7 +1,13 @@
 ## Amazon SageMaker Feature Store with streaming feature aggregation
 
 ### Overview:
-In this repository,  we provide artifacts that demonstrate how to leverage the Amazon SageMaker Feature Store using a streaming aggregation use case for Fraud Detection on credit card transactions. We use Amazon SageMaker to train a model (using the built-in XGBoost algorithm) with aggregate features created from historical credit card transactions. We use streaming aggregation with Amazon Kinesis Data Analytics (KDA) SQL, publishing features in near real time to the feature store. Finally, we use inference to detect fraud on new transactions. For a full explanation of SageMaker Feature Store you can read here (https://aws.amazon.com/sagemaker/feature-store/), which describes the capability as:
+In this repository,  we provide artifacts that demonstrate how to leverage the Amazon SageMaker Feature Store using a streaming aggregation use case for Fraud Detection on credit card transactions. We use Amazon SageMaker to train a model (using the built-in XGBoost algorithm) with aggregate features created from historical credit card transactions. We use streaming aggregation with Amazon Kinesis Data Analytics (KDA) SQL, publishing features in near real time to the feature store. Finally, we use inference to detect fraud on new transactions. 
+
+Here is a diagram showing the overall solution architecture:
+
+<img src="./images/streaming_agg_pattern.png" />
+
+For a full explanation of SageMaker Feature Store you can read [here](https://aws.amazon.com/sagemaker/feature-store/), which describes the capability as:
 
 Amazon SageMaker Feature Store is a purpose-built repository where you can store and access features so it’s much easier to name, organize, and reuse them across teams. SageMaker Feature Store provides a unified store for features during training and real-time inference without the need to write additional code or create manual processes to keep features consistent.
 
