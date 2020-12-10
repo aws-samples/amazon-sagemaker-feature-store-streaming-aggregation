@@ -5,7 +5,7 @@ In this repository,  we provide artifacts that demonstrate how to leverage the A
 
 Here is a diagram showing the overall solution architecture:
 
-<img src="./images/streaming_agg_pattern.png" />
+<img src="./notebooks/images/streaming_agg_pattern.png" />
 
 For a full explanation of SageMaker Feature Store you can read [here](https://aws.amazon.com/sagemaker/feature-store/), which describes the capability as:
 
