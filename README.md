@@ -1,7 +1,7 @@
-## My Project
+## Amazon SageMaker Feature Store with streaming feature aggregation
 
 ### Overview:
-In this repository,  we provide artifacts that demonstrate how to leverage the Amazon SageMaker Feature Store using a streaming aggregation use case for Fraud Detection in credit card transactions. We use Amazon SageMaker to train a model (using the built-in XGBoost algorithm) with aggregate features created from historical credit card transactions. We use streaming aggregation with Amazon Kinesis Data Analytics (KDA) SQL, publishing features in near real time to the feature store. Finally, we use inference to detect fraud on new transactions. For a full explanation of SageMaker Feature Store you can read here (https://aws.amazon.com/sagemaker/feature-store/), which describes the capability as:
+In this repository,  we provide artifacts that demonstrate how to leverage the Amazon SageMaker Feature Store using a streaming aggregation use case for Fraud Detection on credit card transactions. We use Amazon SageMaker to train a model (using the built-in XGBoost algorithm) with aggregate features created from historical credit card transactions. We use streaming aggregation with Amazon Kinesis Data Analytics (KDA) SQL, publishing features in near real time to the feature store. Finally, we use inference to detect fraud on new transactions. For a full explanation of SageMaker Feature Store you can read here (https://aws.amazon.com/sagemaker/feature-store/), which describes the capability as:
 
 Amazon SageMaker Feature Store is a purpose-built repository where you can store and access features so it’s much easier to name, organize, and reuse them across teams. SageMaker Feature Store provides a unified store for features during training and real-time inference without the need to write additional code or create manual processes to keep features consistent.
 
@@ -29,7 +29,7 @@ In addition, having basic knowledge of the following services will be valuable: 
 
 First you will login to your AWS account with an Admin user or role. This will allow the successful launch of the CloudFormation stack template below.  
 
-You can deploy the stack in us-east-2 region and examine the architectural components by following these steps:
+You can [deploy the stack in us-east-1 region](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template?stackName=sm-fs-streaming-agg-stack&templateURL=https://aws-ml-blog.s3.us-east-1.amazonaws.com/artifacts/Using-streaming-ingestion-with-Amazon-SageMaker-Feature-Store/sagemaker-featurestore-template.yaml) and examine the architectural components by following these steps:
 
 1. Use the following button to launch the AWS CloudFormation stack
 2. Once the stack is complete, open the SageMaker Notebook instance and navigate to the various notebooks
@@ -51,20 +51,14 @@ There are a series of six notebooks which should be run in order (they each begi
 * avg_amt_last_1w
 
 
-Follow the step-by-step guide by executing the notebooks in the following folders:
+Follow the step-by-step guide in the following notebooks:
 
-* notebooks/0_prepare_transactions_dataset.ipynb
-* notebooks/1_setup.ipynb
-* notebooks/2_batch_ingestion.ipynb
-* notebooks/3_train_and_deploy_model.ipynb
-* notebooks/4_streaming_predictions.ipynb
-* notebooks/5_cleanup.ipynb
-
-##### Current limitations
-
-This solution does not utilize the SageMaker FeatureStore OFFLINE store. The use case focuses only on the ONLINE store which is leveraged for low-latency consumers.
-
-
+* [notebooks/0_prepare_transactions_dataset.ipynb](./notebooks/0_prepare_transactions_dataset.ipynb) - generate synthetic dataset
+* [notebooks/1_setup.ipynb](./notebooks/1_setup.ipynb) - create feature groups and Kinesis resources
+* [notebooks/2_batch_ingestion.ipynb](./notebooks/2_batch_ingestion.ipynb) - igest one-week aggregate features, and create training dataset
+* [notebooks/3_train_and_deploy_model.ipynb](./notebooks/3_train_and_deploy_model.ipynb) - train and deploy fraud detection model
+* [notebooks/4_streaming_predictions.ipynb](./notebooks/4_streaming_predictions.ipynb) - make fraud predictions on streaming transactions
+* [notebooks/5_cleanup.ipynb](./notebooks/5_cleanup.ipynb) - clean up resources
 
 
 ## Security
