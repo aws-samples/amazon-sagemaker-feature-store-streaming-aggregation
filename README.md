@@ -7,6 +7,8 @@ Here is a diagram showing the overall solution architecture:
 
 <img src="./notebooks/images/streaming_agg_pattern.png" />
 
+For a full walkthrough of using streaming with a feature store, see this [blog post](https://aws.amazon.com/blogs/machine-learning/using-streaming-ingestion-with-amazon-sagemaker-feature-store-to-make-ml-backed-decisions-in-near-real-time/). It explains more about why customers in all industries are increasingly using streaming features in near real time, and gives additional insight about the solution architecture.
+
 For a full explanation of SageMaker Feature Store you can read [here](https://aws.amazon.com/sagemaker/feature-store/), which describes the capability as:
 
 Amazon SageMaker Feature Store is a purpose-built repository where you can store and access features so it’s much easier to name, organize, and reuse them across teams. SageMaker Feature Store provides a unified store for features during training and real-time inference without the need to write additional code or create manual processes to keep features consistent.
