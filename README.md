@@ -1,7 +1,7 @@
 ## Using Amazon SageMaker Feature Store with streaming feature aggregation
 
 ### Overview:
-In this repository, we provide artifacts that demonstrate how to leverage the Amazon SageMaker Feature Store using streaming feature aggregation. Our use case is Fraud Detection on credit card transactions. We use Amazon SageMaker to train a model (using the built-in XGBoost algorithm) with aggregate features created from historical credit card transactions. We use streaming aggregation with Amazon Kinesis and Amazon Kinesis Data Analytics (KDA) SQL, publishing features in near real time to the feature store. Finally, we pull the latest aggregate feature values from the feature store at inference time, passing them as input to our fraud detection model hosted in an Amazon SageMaker endpoint.
+In this repository, we provide artifacts that demonstrate how to leverage Amazon SageMaker Feature Store and Kinesis Data Analytics for streaming feature aggregation. Our use case is Fraud Detection on credit card transactions. We use Amazon SageMaker to train a model (using the built-in XGBoost algorithm) with aggregate features created from historical credit card transactions. We use streaming aggregation with Amazon Kinesis and Amazon Kinesis Data Analytics (KDA) SQL, publishing features in near real time to SageMaker Feature Store. Finally, we pull the latest aggregate feature values from the feature store at inference time, passing them as input to our fraud detection model hosted in an Amazon SageMaker endpoint.
 
 Here is a diagram showing the overall solution architecture:
 
@@ -26,32 +26,29 @@ This implementation shows you how to do the following:
 
 Prior to running the steps under Instructions, you will need access to an AWS Account where you have full Admin privileges. The CloudFormation template will deploy multiple AWS Lambda functions, IAM Roles, and a new SageMaker notebook instance with this repo already cloned. In addition, having basic knowledge of the following services will be valuable: Amazon Kinesis streams, Amazon Kinesis Data Analytics, Amazon SageMaker, AWS Lambda functions, Amazon IAM Roles.
 
-#### Instructions
+### Instructions
 
-First you will login to your AWS account with an Admin user or role. This will allow the successful launch of the CloudFormation stack template. You can deploy the stack and explore our example by following these steps:
+1. Click 'Launch Stack' for the AWS region you want to deploy resources into
 
-To begin, click the Launch link in Step 1 below
+|AWS Region                |     Link        |
+|:------------------------:|:-----------:|
+|us-east-1 (N. Virgnia)    | [<img src="./notebooks/images/cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=sm-fs-streaming-agg-stack&templateURL=https://s3.amazonaws.com/sagemaker-feature-store-streaming-aggregation-us-east-1/artifacts/latest/sagemaker-featurestore-template.yaml) |
+|us-east-2 (Ohio)          | [<img src="./notebooks/images/cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-east-2#/stacks/new?stackName=sm-fs-streaming-agg-stack&templateURL=https://s3.amazonaws.com/sagemaker-feature-store-streaming-aggregation-us-east-2/artifacts/latest/sagemaker-featurestore-template.yaml) |
+|us-west-1 (N. California) | [<img src="./notebooks/images/cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-west-1#/stacks/new?stackName=sm-fs-streaming-agg-stack&templateURL=https://s3.amazonaws.com/sagemaker-feature-store-streaming-aggregation-us-west-1/artifacts/latest/sagemaker-featurestore-template.yaml) |
+|eu-west-1 (Dublin)        | [<img src="./notebooks/images/cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=sm-fs-streaming-agg-stack&templateURL=https://s3.amazonaws.com/sagemaker-feature-store-streaming-aggregation-eu-west-1/artifacts/latest/sagemaker-featurestore-template.yaml) |
+|ap-northeast-1 (Tokyo)    | [<img src="./notebooks/images/cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/new?stackName=sm-fs-streaming-agg-stack&templateURL=https://s3.amazonaws.com/sagemaker-feature-store-streaming-aggregation-ap-northeast-1/artifacts/latest/sagemaker-featurestore-template.yaml) |
 
-1. [Launch](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template?stackName=sm-fs-streaming-agg-stack&templateURL=https://aws-ml-blog.s3.us-east-1.amazonaws.com/artifacts/Using-streaming-ingestion-with-Amazon-SageMaker-Feature-Store/sagemaker-featurestore-template.yaml) the AWS CloudFormation stack in us-east-1. 
-To deploy the stack in other regions, [follow these instructions](./create_stack_in_other_regions.md).
+To deploy the stack in other regions, you can [follow these instructions](./create_stack_in_other_regions.md). Please log an issue in this repo if you would like additional regions officially supported.
 
-  - You will need to give your CloudFormation stack a name. We suggest you enter the preferred name -> `sm-fs-streaming-agg-stack` (note, if you use a different Stack name, you will need to update the cell at the top of notebook named `1_setup.ipynb` to match it)
-  - During CloudFormation configuration, you can easily select between several ML Instance Types, used by SageMaker to deploy the Notebook, using the selector as shown here:
-<img src="./notebooks/images/CFN-Param-InstanceType-select.png" />
+2. Click 'Next' for 'Specify template', 'Specify stack details', and 'Configure stack options'. On the 'Review' step, check the box that says 'I acknowledge that AWS CloudFormation might create IAM resources with custom names.' and then click 'Create Stack'. 
 
-  - The CloudFormation deployment can take a few minutes, so be patient, you can always hit the Refresh arrow to update the status. When it's done, you can click on the `Resources` tab to see the architectural resources created by the template. Here is an example:
+You can view the CloudFormation template directly by looking [here](./templates/sagemaker-featurestore-template.yaml). The stack will take a few minutes to launch. When it completes, you can view the items created by clicking on the Resources tab. Here is an example:
 <img src="./notebooks/images/CFN-Stack-CREATE_COMPLETE.png" />
 
-2. Once the stack is complete, open the SageMaker Notebook instance and read and execute each notebook.
-3. View the Kinesis Stream that is used to ingest records.
-4. View the Kinesis Data Analytics SQL query that pulls data from the stream.
-5. View the Lambda function that receives the initial kinesis events and writes to the FeatureStore.
-6. View the Lambda function that receives the final kinesis events and triggers the model prediction.
+3. Once the stack is complete, browse to Amazon SageMaker in the AWS console and click on the 'Notebook Instances' tab on the left. 
+4. Click either 'Jupyter' or 'JupyterLab' to access the SageMaker Notebook instance. The Cloudformation template has cloned this git repository into the notebook instance for you. All of the example code to work through is in the notebooks directory. 
 
-You can view the CloudFormation template directly by looking [here](./templates/sagemaker-featurestore-template.yaml). The stack will take a few minutes to launch. When it completes, you can view the items created by clicking on the Resources tab.
-
-To use these notebooks from SageMaker Studio, add a new Studio user, selecting the IAM role that was created by the CloudFormation stack. Open Studio for that new user, and git clone this repo. All other steps are the same.
-
+**To use these notebooks from an existing SageMaker Studio domain, add a new Studio user and select the IAM role that was created by the CloudFormation stack. Open Studio for that new user, and git clone this repo. All other steps are the same.**
 #### Running the Notebooks
 
 There are a series of notebooks which should be run in order. Follow the step-by-step guide in each notebook:
@@ -61,7 +58,17 @@ There are a series of notebooks which should be run in order. Follow the step-by
 * [notebooks/2_batch_ingestion.ipynb](./notebooks/2_batch_ingestion.ipynb) - igest one-week aggregate features, and create training dataset
 * [notebooks/3_train_and_deploy_model.ipynb](./notebooks/3_train_and_deploy_model.ipynb) - train and deploy fraud detection model
 * [notebooks/4_streaming_predictions.ipynb](./notebooks/4_streaming_predictions.ipynb) - make fraud predictions on streaming transactions
-* [notebooks/5_cleanup.ipynb](./notebooks/5_cleanup.ipynb) - clean up resources
+
+#### Optional steps
+- View the Kinesis Stream that is used to ingest records.
+- View the Kinesis Data Analytics SQL query that pulls data from the stream.
+- View the Lambda function that receives the initial kinesis events and writes to the FeatureStore.
+- View the Lambda function that receives the final kinesis events and triggers the model prediction.
+
+### **CLEAN UP - IMPORTANT**
+To destroy the AWS resources created as part of this example, complete the following two steps:
+1. Run all cells in [notebooks/5_cleanup.ipynb](./notebooks/5_cleanup.ipynb) 
+2. Go to CloudFormation in the AWS console, select `sm-fs-streaming-agg-stack` and click 'Delete'.
 
 
 ## Security
