@@ -314,7 +314,7 @@ Resources:
     Type: "AWS::SageMaker::NotebookInstance"
     Properties:
       NotebookInstanceName: !Ref SageMakerNotebookName
-      InstanceType: "ml.t3.medium"
+      InstanceType: "ml.m5.xlarge"
       RoleArn: !GetAtt SageMakerRole.Arn
       DefaultCodeRepository: "https://github.com/aws-samples/amazon-sagemaker-feature-store-streaming-aggregation"
 
