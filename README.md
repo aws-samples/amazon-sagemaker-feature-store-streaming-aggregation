@@ -1,13 +1,13 @@
 ## Using Amazon SageMaker Feature Store with streaming feature aggregation
 
 ### Overview:
-In this repository, we provide artifacts that demonstrate how to leverage Amazon SageMaker Feature Store and Kinesis Data Analytics for streaming feature aggregation. Our use case is Fraud Detection on credit card transactions. We use Amazon SageMaker to train a model (using the built-in XGBoost algorithm) with aggregate features created from historical credit card transactions. We use streaming aggregation with Amazon Kinesis and Amazon Kinesis Data Analytics (KDA) SQL, publishing features in near real time to SageMaker Feature Store. Finally, we pull the latest aggregate feature values from the feature store at inference time, passing them as input to our fraud detection model hosted in an Amazon SageMaker endpoint.
+In this repository, we provide artifacts that demonstrate how to leverage Amazon SageMaker Feature Store and Kinesis Data Analytics for streaming feature aggregation. Our use case is Fraud Detection on credit card transactions. We use Amazon SageMaker to train a model (using the built-in XGBoost algorithm) with aggregate features created from historical credit card transactions. We use streaming aggregation with Amazon Kinesis and Amazon Kinesis Data Analytics (KDA) SQL, publishing features in near real-time to SageMaker Feature Store. Finally, we pull the latest aggregate feature values from the feature store at inference time, passing them as input to our fraud detection model hosted in an Amazon SageMaker endpoint.
 
 Here is a diagram showing the overall solution architecture:
 
 <img src="./notebooks/images/streaming_agg_pattern.png" />
 
-For a full walkthrough of using streaming with a feature store, see this [blog post](https://aws.amazon.com/blogs/machine-learning/using-streaming-ingestion-with-amazon-sagemaker-feature-store-to-make-ml-backed-decisions-in-near-real-time/). It explains more about why customers in all industries are increasingly using streaming features in near real time, and gives additional insight about the solution architecture.
+For a full walkthrough of using streaming with a feature store, see this [blog post](https://aws.amazon.com/blogs/machine-learning/using-streaming-ingestion-with-amazon-sagemaker-feature-store-to-make-ml-backed-decisions-in-near-real-time/). It explains more about why customers in all industries are increasingly using streaming features in near real-time, and gives additional insight about the solution architecture.
 
 For a full explanation of SageMaker Feature Store you can read [here](https://aws.amazon.com/sagemaker/feature-store/), which describes the capability as:
 
@@ -17,9 +17,9 @@ This implementation shows you how to do the following:
 
 * Create multiple SageMaker Feature Groups to store aggregate data from a credit card dataset
 * Run a SageMaker Processing Spark job to aggregate raw features and derive new features for model training
-* Train a SageMaker XGBoost model and deploy it as an endpoint for real time inference
+* Train a SageMaker XGBoost model and deploy it as an endpoint for real-time inference
 * Generate simulated credit card transactions sending them to Amazon Kinesis 
-* Use KDA SQL to aggregate features in near real time, triggering a Lambda function to update feature values in an online-only feature group
+* Use KDA SQL to aggregate features in near real-time, triggering a Lambda function to update feature values in an online-only feature group
 * Trigger a Lambda function to invoke the SageMaker endpoint and detect fraudulent transactions
 
 ### Prerequisites
@@ -51,7 +51,7 @@ You can view the CloudFormation template directly by looking [here](./templates/
 **To use these notebooks from an existing SageMaker Studio domain, add a new Studio user and select the IAM role that was created by the CloudFormation stack. Open Studio for that new user, and git clone this repo. All other steps are the same.**
 #### Running the Notebooks
 
-There are a series of notebooks which should be run in order. Follow the step-by-step guide in each notebook:
+There are a series of notebooks that should be run in order. Follow the step-by-step guide in each notebook:
 
 * [notebooks/0_prepare_transactions_dataset.ipynb](./notebooks/0_prepare_transactions_dataset.ipynb) - generate synthetic dataset
 * [notebooks/1_setup.ipynb](./notebooks/1_setup.ipynb) - create feature groups and Kinesis resources (can run this in parallel with notebook 0, no dependencies between them)
